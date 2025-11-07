@@ -82,7 +82,7 @@ contract YieldSplitter {
      * @param _expiry Expiration timestamp for the market
      * @param _initialApr Initial APR in basis points (e.g., 1000 = 10%)
      */
-    function createBondMarket(address _yieldBearingToken, address _assetToken, uint256 _expiry, uint256 _initialApr)
+    function createYieldMarket(address _yieldBearingToken, address _assetToken, uint256 _expiry, uint256 _initialApr)
         external
     {
         bytes32 marketId = _getMarketId(_yieldBearingToken, _assetToken, _expiry);
@@ -113,7 +113,7 @@ contract YieldSplitter {
     /**
      * @notice Mints PT and YT tokens by depositing yield-bearing tokens
      * @dev User deposits YBT and receives 1:1 amounts of PT and YT tokens
-     * @param _marketId Unique identifier for the bond market
+     * @param _marketId Unique identifier for the yield market
      * @param _amount Amount of yield-bearing tokens to deposit
      */
     function mintPtAndYt(bytes32 _marketId, uint256 _amount) external {
