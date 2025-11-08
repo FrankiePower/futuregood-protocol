@@ -155,11 +155,11 @@ contract FullFlowTest is Test {
         deal(address(asset), user, depositAmount);
 
         console2.log("User deposits:", depositAmount / 1e6, "USDC");
-        console2.log("Expected behavior (AFTER FIXES):");
+        console2.log("Expected behavior:");
         console2.log("- User gets 100 PT (redeemable at maturity)");
         console2.log("- YT goes to Hook for sale");
-        console2.log("- Funds stay in YieldSplitter (NOT deployed yet)");
-        console2.log("- TODO: Deploy to user strategies where yield -> YT holders\n");
+        console2.log("- Funds deployed to YieldRouter -> strategies");
+        console2.log("- Strategies generate yield for YT holders (Charlie)\n");
 
         // User deposits to YieldSplitter in public goods mode
         vm.startPrank(user);
@@ -178,16 +178,24 @@ contract FullFlowTest is Test {
         assertEq(ytSellerYT, depositAmount, "YT seller should have YT");
         console2.log("[OK] YT seller received:", ytSellerYT / 1e6, "YT (for sale to public goods)");
 
-        // UPDATED AFTER FIX: Funds stay in YieldSplitter (not deployed)
+        // Verify funds were deployed to strategies via YieldRouter
         uint256 splitterBalance = IERC20(address(asset)).balanceOf(address(yieldSplitter));
+        console2.log("\n[DEPLOYED] Funds deployed to strategies:");
+        console2.log("- YieldSplitter USDC balance:", splitterBalance / 1e6, "(should be 0)");
 
-        console2.log("\n[FIXED] Funds held in YieldSplitter:");
-        console2.log("- USDC balance:", splitterBalance / 1e6);
-        console2.log("- NOT deployed to avoid yield going to dragonRouter");
+        // Check strategy balances (YieldRouter deposits on behalf of YieldSplitter)
+        uint256 aaveShares = IERC4626(address(aaveStrategy)).balanceOf(address(yieldSplitter));
+        uint256 morphoShares = IERC4626(address(morphoStrategy)).balanceOf(address(yieldSplitter));
+        uint256 sparkShares = IERC4626(address(sparkStrategy)).balanceOf(address(yieldSplitter));
 
-        // Verify funds stay in YieldSplitter
-        assertEq(splitterBalance, depositAmount, "Funds should stay in YieldSplitter");
-        console2.log("[OK] Correct: Funds not deployed (prevents wrong yield routing)");
+        console2.log("- Aave shares:", aaveShares / 1e6);
+        console2.log("- Morpho shares:", morphoShares / 1e6);
+        console2.log("- Spark shares:", sparkShares / 1e6);
+
+        // Verify funds were deployed (YieldSplitter balance should be 0)
+        assertEq(splitterBalance, 0, "Funds should be deployed to strategies");
+        assertGt(aaveShares + morphoShares + sparkShares, 0, "Should have strategy shares");
+        console2.log("[OK] Correct: Funds deployed to generate yield for YT holders");
 
         // Simulate YT sale proceeds going to dragonRouter
         // In real flow: Hook sells YT on Uniswap -> sends proceeds to dragonRouter
@@ -209,16 +217,18 @@ contract FullFlowTest is Test {
         uint256 dragonBalance = IERC20(address(asset)).balanceOf(dragonRouter);
         assertEq(dragonBalance, ytSaleProceeds, "DragonRouter should receive YT sale proceeds");
 
-        console2.log("\n[SUCCESS] Corrected Flow After Fixes!");
+        console2.log("\n[SUCCESS] Complete Flow!");
         console2.log("COMPLETE FLOW:");
         console2.log("1. User deposits 100 USDC");
         console2.log("2. User receives 100 PT (principal receipt)");
         console2.log("3. YT seller receives 100 YT");
-        console2.log("4. YT sold on Uniswap for 5 USDC");
-        console2.log("5. Hook sends 5 USDC DIRECTLY to dragonRouter (FIXED!)");
-        console2.log("6. User can redeem PT for 100 USDC at maturity");
-        console2.log("7. Total funding: 5 USDC upfront to public goods");
-        console2.log("8. TODO: Deploy user's 100 USDC to separate strategies where yield -> YT holders\n");
+        console2.log("4. Funds deployed to strategies (generate yield for YT holders)");
+        console2.log("5. YT sold on Uniswap for 5 USDC");
+        console2.log("6. Hook sends 5 USDC DIRECTLY to dragonRouter");
+        console2.log("7. dragonRouter gets 5 USDC IMMEDIATELY");
+        console2.log("8. Charlie (YT holder) will get ~5 USDC yield over the year");
+        console2.log("9. User can redeem PT for 100 USDC at maturity");
+        console2.log("10. Result: dragonRouter gets 5 USDC upfront, Charlie gets 5 USDC yield!\n");
     }
 
     /**

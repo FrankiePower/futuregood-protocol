@@ -170,6 +170,7 @@ contract YieldSplitter {
         require(market.yieldBearingToken != address(0), "!exist");
         require(block.timestamp < market.expiry, "expired");
         require(ytSeller != address(0), "ytSeller not set");
+        require(address(yieldRouter) != address(0), "yieldRouter not set");
 
         // Transfer YBT from user
         IERC20(market.yieldBearingToken).safeTransferFrom(msg.sender, address(this), _amount);
@@ -180,13 +181,18 @@ contract YieldSplitter {
         // Mint YT to ytSeller (for auto-sale to public goods)
         YieldToken(market.yieldToken).mint(ytSeller, _amount);
 
-        // REMOVED: Auto-deployment to YieldRouter
-        // The current YieldRouter sends yield to dragonRouter, but YT buyers need that yield!
-        // For now, funds stay in YieldSplitter until proper user strategy routing is implemented
+        // Deploy user's funds to YieldRouter to generate yield for YT holders
+        // CRITICAL: User's deposit (100 USDC) goes to strategies → generates yield for Charlie (YT buyer)
+        //           This is SEPARATE from YT sale proceeds which go directly to dragonRouter via Hook
         //
-        // FUTURE FIX: Deploy to separate user strategies where:
-        //   - User deposits (100 USDC) → userStrategies → yield goes to YT holders (Charlie)
-        //   - YT sale proceeds (5 USDC) → dragonRouter directly (already fixed in Hook!)
+        // Flow:
+        //   1. User's 100 USDC → YieldRouter → Aave/Morpho/Spark strategies
+        //   2. Strategies earn ~5 USDC yield over the year
+        //   3. Charlie (YT holder) can claim this ~5 USDC yield
+        //   4. Meanwhile, YT sale (5 USDC) goes to dragonRouter immediately via Hook
+        //   5. Result: dragonRouter gets 5 USDC upfront, Charlie gets 5 USDC yield (fair trade!)
+        IERC20(market.yieldBearingToken).approve(address(yieldRouter), _amount);
+        yieldRouter.deposit(_amount);
 
         emit PublicGoodsDeposit(_marketId, msg.sender, _amount, _amount, _amount);
     }

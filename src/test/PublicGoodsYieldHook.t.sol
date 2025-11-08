@@ -15,6 +15,7 @@ import {PoolKey} from "v4-core/types/PoolKey.sol";
 import {Hooks} from "v4-core/libraries/Hooks.sol";
 
 import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockERC4626} from "./mocks/MockERC4626.sol";
 
 /**
  * @title PublicGoodsYieldHookTest
@@ -31,6 +32,11 @@ contract PublicGoodsYieldHookTest is Test {
     MockERC20 public underlyingAsset;
     MockERC20 public yieldBearingToken;
 
+    // Mock strategy vaults
+    MockERC4626 public mockAaveStrategy;
+    MockERC4626 public mockMorphoStrategy;
+    MockERC4626 public mockSparkStrategy;
+
     address public dragonRouter = address(0x123);
     address public poolManager = address(0x456);
 
@@ -42,12 +48,24 @@ contract PublicGoodsYieldHookTest is Test {
         underlyingAsset = new MockERC20("DAI", "DAI", 18);
         yieldBearingToken = new MockERC20("aDAI", "aDAI", 18);
 
+        // Deploy mock ERC4626 vaults
+        mockAaveStrategy = new MockERC4626(address(yieldBearingToken), "Mock Aave Vault", "mAave");
+        mockMorphoStrategy = new MockERC4626(address(yieldBearingToken), "Mock Morpho Vault", "mMorpho");
+        mockSparkStrategy = new MockERC4626(address(yieldBearingToken), "Mock Spark Vault", "mSpark");
+
         // Deploy core contracts
         yieldSplitter = new YieldSplitter();
 
-        // Note: YieldRouter constructor requires Aave/Morpho/Spark addresses
-        // For unit test, we'll skip YieldRouter deployment
-        // Full integration tests would deploy complete infrastructure
+        // Deploy REAL YieldRouter with mock ERC4626 vaults
+        yieldRouter = new YieldRouter(
+            address(yieldBearingToken),
+            address(mockAaveStrategy),
+            address(mockMorphoStrategy),
+            address(mockSparkStrategy)
+        );
+
+        // Connect YieldSplitter to YieldRouter
+        yieldSplitter.setYieldRouter(address(yieldRouter));
 
         expiry = block.timestamp + 365 days;
 

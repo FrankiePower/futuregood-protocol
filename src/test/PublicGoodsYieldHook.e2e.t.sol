@@ -20,10 +20,12 @@ import {LiquidityAmounts} from "@uniswap/v4-core/test/utils/LiquidityAmounts.sol
 
 import {PublicGoodsYieldHook} from "../core/PublicGoodsYieldHook.sol";
 import {YieldSplitter} from "../core/YieldSplitter.sol";
+import {YieldRouter} from "../core/YieldRouter.sol";
 import {PrincipalToken} from "../core/PrincipalToken.sol";
 import {YieldToken} from "../core/YieldToken.sol";
 
 import {MockERC20} from "./mocks/MockERC20.sol";
+import {MockERC4626} from "./mocks/MockERC4626.sol";
 
 /**
  * @title PublicGoodsYieldHookE2ETest
@@ -49,8 +51,13 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
 
     address public user1 = address(0x1);
     address public trader = address(0x2);
-    address public mockYieldRouter = address(0x998); // Mock for testing
     address public dragonRouter = address(0x999); // DragonRouter address (same as fullflow test)
+
+    // Mock strategy vaults
+    MockERC4626 public mockAaveStrategy;
+    MockERC4626 public mockMorphoStrategy;
+    MockERC4626 public mockSparkStrategy;
+    YieldRouter public yieldRouter;
 
     uint256 constant INITIAL_SUPPLY = 1000 ether;
 
@@ -89,8 +96,26 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         console2.log("PT Token:", market.principalToken);
         console2.log("YT Token:", market.yieldToken);
 
+        // 4. Deploy mock ERC4626 vaults and YieldRouter BEFORE hook
+        console2.log("\n=== PHASE 4: Deploy YieldRouter ===");
+        mockAaveStrategy = new MockERC4626(address(yieldBearingToken), "Mock Aave Vault", "mAave");
+        mockMorphoStrategy = new MockERC4626(address(yieldBearingToken), "Mock Morpho Vault", "mMorpho");
+        mockSparkStrategy = new MockERC4626(address(yieldBearingToken), "Mock Spark Vault", "mSpark");
+
+        yieldRouter = new YieldRouter(
+            address(yieldBearingToken),
+            address(mockAaveStrategy),
+            address(mockMorphoStrategy),
+            address(mockSparkStrategy)
+        );
+        console2.log("YieldRouter deployed at:", address(yieldRouter));
+
+        // Connect YieldSplitter to YieldRouter (needed for mintPtAndYtForPublicGoods)
+        yieldSplitter.setYieldRouter(address(yieldRouter));
+        console2.log("YieldSplitter connected to YieldRouter");
+
         // 5. Deploy hook at correct address with flags
-        console2.log("\n=== PHASE 4: Deploy Hook ===");
+        console2.log("\n=== PHASE 5: Deploy Hook ===");
 
         // Calculate hook address with correct permissions
         uint160 flags = uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.AFTER_SWAP_FLAG);
@@ -98,7 +123,8 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         console2.log("Hook flags needed:", flags);
 
         // Deploy hook - use deployCodeTo to deploy with constructor args at specific address
-        bytes memory constructorArgs = abi.encode(manager, mockYieldRouter, address(yieldSplitter), dragonRouter);
+        // Note: Hook's yieldRouter parameter is not used anymore (hook sends directly to dragonRouter)
+        bytes memory constructorArgs = abi.encode(manager, address(yieldRouter), address(yieldSplitter), dragonRouter);
         address hookAddress = address(flags);
 
         deployCodeTo("PublicGoodsYieldHook.sol", constructorArgs, hookAddress);
