@@ -91,12 +91,7 @@ contract YieldRouterSetup is Test, IEvents {
         sparkStrategy = IStrategyInterface(setUpSparkStrategy());
 
         // Deploy the YieldRouter
-        router = new YieldRouter(
-            address(asset),
-            address(aaveStrategy),
-            address(morphoStrategy),
-            address(sparkStrategy)
-        );
+        router = new YieldRouter(address(asset), address(aaveStrategy), address(morphoStrategy), address(sparkStrategy));
 
         // label all the used addresses for traces
         vm.label(keeper, "keeper");

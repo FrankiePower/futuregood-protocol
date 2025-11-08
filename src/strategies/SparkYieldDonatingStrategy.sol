@@ -165,7 +165,14 @@ contract SparkYieldDonatingStrategy is BaseStrategy {
      * @dev Spark vaults have a depositCap enforced by governance
      * @return Maximum amount that can be deposited
      */
-    function availableDepositLimit(address /*_owner*/) public view override returns (uint256) {
+    function availableDepositLimit(
+        address /*_owner*/
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
         // Respect Spark vault's deposit cap
         // The cap is set by Spark governance via DEFAULT_ADMIN_ROLE
         uint256 sparkLimit = sparkVault.maxDeposit(address(this));
@@ -178,7 +185,14 @@ contract SparkYieldDonatingStrategy is BaseStrategy {
      *      totalAssets() may exceed balance if Liquidity Layer deployed funds
      * @return Maximum amount that can be withdrawn
      */
-    function availableWithdrawLimit(address /*_owner*/) public view override returns (uint256) {
+    function availableWithdrawLimit(
+        address /*_owner*/
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
         // Return maximum withdrawable from Spark
         // This respects available liquidity (some may be deployed by TAKER_ROLE)
         // assetsOutstanding = totalAssets - vault.balance
@@ -216,9 +230,7 @@ contract SparkYieldDonatingStrategy is BaseStrategy {
     function getVaultSavingsRate() external view returns (uint256) {
         // Note: This assumes SparkVault has a public vsr() function
         // If not available, this function can be removed
-        (bool success, bytes memory data) = address(sparkVault).staticcall(
-            abi.encodeWithSignature("vsr()")
-        );
+        (bool success, bytes memory data) = address(sparkVault).staticcall(abi.encodeWithSignature("vsr()"));
         if (success && data.length >= 32) {
             return abi.decode(data, (uint256));
         }

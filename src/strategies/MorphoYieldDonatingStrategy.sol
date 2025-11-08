@@ -150,7 +150,14 @@ contract MorphoYieldDonatingStrategy is BaseStrategy {
      * @dev Default: respects Morpho vault's deposit limits
      * @return Maximum amount that can be deposited
      */
-    function availableDepositLimit(address /*_owner*/) public view override returns (uint256) {
+    function availableDepositLimit(
+        address /*_owner*/
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
         // Respect Morpho vault's deposit limit (based on caps and allocations)
         uint256 morphoLimit = morphoVault.maxDeposit(address(this));
         return morphoLimit;
@@ -161,7 +168,14 @@ contract MorphoYieldDonatingStrategy is BaseStrategy {
      * @dev Default: can withdraw up to what's available in Morpho
      * @return Maximum amount that can be withdrawn
      */
-    function availableWithdrawLimit(address /*_owner*/) public view override returns (uint256) {
+    function availableWithdrawLimit(
+        address /*_owner*/
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
         // Return maximum withdrawable from Morpho (respects liquidity across markets)
         return morphoVault.maxWithdraw(address(this));
     }

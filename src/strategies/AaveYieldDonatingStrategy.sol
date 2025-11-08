@@ -143,7 +143,14 @@ contract AaveYieldDonatingStrategy is BaseStrategy {
      * @dev Default: unlimited deposits
      * @return Maximum amount that can be deposited
      */
-    function availableDepositLimit(address /*_owner*/) public pure override returns (uint256) {
+    function availableDepositLimit(
+        address /*_owner*/
+    )
+        public
+        pure
+        override
+        returns (uint256)
+    {
         // Optional: Add deposit caps here if needed
         // For example, limit to Aave vault's deposit limit:
         // return aaveVault.maxDeposit(address(this));
@@ -156,7 +163,14 @@ contract AaveYieldDonatingStrategy is BaseStrategy {
      * @dev Default: can withdraw up to what's available in Aave
      * @return Maximum amount that can be withdrawn
      */
-    function availableWithdrawLimit(address /*_owner*/) public view override returns (uint256) {
+    function availableWithdrawLimit(
+        address /*_owner*/
+    )
+        public
+        view
+        override
+        returns (uint256)
+    {
         // Return maximum withdrawable from Aave (respects Aave's liquidity)
         return aaveVault.maxWithdraw(address(this));
     }

@@ -59,11 +59,7 @@ contract PublicGoodsYieldHookTest is Test {
             500 // 5% APR
         );
 
-        marketId = keccak256(abi.encode(
-            address(yieldBearingToken),
-            address(underlyingAsset),
-            expiry
-        ));
+        marketId = keccak256(abi.encode(address(yieldBearingToken), address(underlyingAsset), expiry));
 
         // Verify market was created
         YieldSplitter.YieldMarket memory market = yieldSplitter.getYieldMarket(marketId);
@@ -135,7 +131,7 @@ contract PublicGoodsYieldHookTest is Test {
         yieldSplitter.setYTSeller(ytSeller2);
     }
 
-    function test_HookPermissions() pure public {
+    function test_HookPermissions() public pure {
         // Note: This test shows how hook would be configured
         // Full deployment requires hook address calculation and PoolManager setup
 

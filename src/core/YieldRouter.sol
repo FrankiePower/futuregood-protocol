@@ -29,14 +29,18 @@ contract YieldRouter {
     IERC4626 public immutable sparkStrategy;
 
     /// @notice Allocation percentages (basis points)
-    uint256 public constant AAVE_ALLOCATION = 4000;  // 40%
+    uint256 public constant AAVE_ALLOCATION = 4000; // 40%
     uint256 public constant MORPHO_ALLOCATION = 3000; // 30%
-    uint256 public constant SPARK_ALLOCATION = 3000;  // 30%
+    uint256 public constant SPARK_ALLOCATION = 3000; // 30%
     uint256 public constant BASIS_POINTS = 10000;
 
     /// @notice Events
-    event Deposited(address indexed user, uint256 amount, uint256 aaveShares, uint256 morphoShares, uint256 sparkShares);
-    event Withdrawn(address indexed user, uint256 amount, uint256 aaveShares, uint256 morphoShares, uint256 sparkShares);
+    event Deposited(
+        address indexed user, uint256 amount, uint256 aaveShares, uint256 morphoShares, uint256 sparkShares
+    );
+    event Withdrawn(
+        address indexed user, uint256 amount, uint256 aaveShares, uint256 morphoShares, uint256 sparkShares
+    );
 
     /**
      * @notice Initialize the YieldRouter
@@ -45,12 +49,7 @@ contract YieldRouter {
      * @param _morphoStrategy Address of deployed MorphoYieldDonatingStrategy
      * @param _sparkStrategy Address of deployed SparkYieldDonatingStrategy
      */
-    constructor(
-        address _asset,
-        address _aaveStrategy,
-        address _morphoStrategy,
-        address _sparkStrategy
-    ) {
+    constructor(address _asset, address _aaveStrategy, address _morphoStrategy, address _sparkStrategy) {
         require(_asset != address(0), "YieldRouter: zero asset");
         require(_aaveStrategy != address(0), "YieldRouter: zero aave");
         require(_morphoStrategy != address(0), "YieldRouter: zero morpho");
@@ -79,10 +78,7 @@ contract YieldRouter {
      * @return morphoShares Shares received from Morpho strategy
      * @return sparkShares Shares received from Spark strategy
      */
-    function deposit(uint256 amount)
-        external
-        returns (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares)
-    {
+    function deposit(uint256 amount) external returns (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) {
         require(amount > 0, "YieldRouter: zero amount");
 
         // Transfer assets from user to router
@@ -247,11 +243,7 @@ contract YieldRouter {
      * @return toMorpho Amount that would go to Morpho (30%)
      * @return toSpark Amount that would go to Spark (30%)
      */
-    function previewDeposit(uint256 amount)
-        external
-        pure
-        returns (uint256 toAave, uint256 toMorpho, uint256 toSpark)
-    {
+    function previewDeposit(uint256 amount) external pure returns (uint256 toAave, uint256 toMorpho, uint256 toSpark) {
         toAave = (amount * AAVE_ALLOCATION) / BASIS_POINTS;
         toMorpho = (amount * MORPHO_ALLOCATION) / BASIS_POINTS;
         toSpark = amount - toAave - toMorpho;

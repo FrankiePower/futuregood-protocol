@@ -75,11 +75,7 @@ contract PublicGoodsYieldHook is BaseHook {
      * @param _yieldRouter YieldRouter for routing proceeds
      * @param _yieldSplitter YieldSplitter for market data
      */
-    constructor(
-        IPoolManager _poolManager,
-        address _yieldRouter,
-        address _yieldSplitter
-    ) BaseHook(_poolManager) {
+    constructor(IPoolManager _poolManager, address _yieldRouter, address _yieldSplitter) BaseHook(_poolManager) {
         require(_yieldRouter != address(0), "zero router");
         require(_yieldSplitter != address(0), "zero splitter");
 
@@ -94,13 +90,13 @@ contract PublicGoodsYieldHook is BaseHook {
     function getHookPermissions() public pure override returns (Hooks.Permissions memory) {
         return Hooks.Permissions({
             beforeInitialize: false,
-            afterInitialize: true,      // Enable auto-routing by default
+            afterInitialize: true, // Enable auto-routing by default
             beforeAddLiquidity: false,
             afterAddLiquidity: false,
             beforeRemoveLiquidity: false,
             afterRemoveLiquidity: false,
             beforeSwap: false,
-            afterSwap: true,            // THE MAGIC - auto-route proceeds
+            afterSwap: true, // THE MAGIC - auto-route proceeds
             beforeDonate: false,
             afterDonate: false,
             beforeSwapReturnDelta: false,
@@ -141,11 +137,7 @@ contract PublicGoodsYieldHook is BaseHook {
      * @notice Hook called after pool initialization
      * @dev Enable auto-routing by default for new pools
      */
-    function _afterInitialize(address, PoolKey calldata key, uint160, int24)
-        internal
-        override
-        returns (bytes4)
-    {
+    function _afterInitialize(address, PoolKey calldata key, uint160, int24) internal override returns (bytes4) {
         PoolId poolId = key.toId();
         autoRouteEnabled[poolId] = true;
         return this.afterInitialize.selector;
@@ -155,13 +147,11 @@ contract PublicGoodsYieldHook is BaseHook {
      * @notice THE MAGIC: Auto-route YBT proceeds after swaps
      * @dev Called after EVERY swap in the pool
      */
-    function _afterSwap(
-        address,
-        PoolKey calldata key,
-        SwapParams calldata,
-        BalanceDelta,
-        bytes calldata
-    ) internal override returns (bytes4, int128) {
+    function _afterSwap(address, PoolKey calldata key, SwapParams calldata, BalanceDelta, bytes calldata)
+        internal
+        override
+        returns (bytes4, int128)
+    {
         PoolId poolId = key.toId();
 
         // Skip if auto-routing not enabled
@@ -200,31 +190,17 @@ contract PublicGoodsYieldHook is BaseHook {
      * @param ybt YBT token address
      * @param amount Amount to route
      */
-    function _routeToYieldStrategies(
-        PoolId poolId,
-        bytes32 marketId,
-        address ybt,
-        uint256 amount
-    ) internal {
+    function _routeToYieldStrategies(PoolId poolId, bytes32 marketId, address ybt, uint256 amount) internal {
         // Approve YieldRouter
         IERC20(ybt).forceApprove(address(yieldRouter), amount);
 
         // Deposit into YieldRouter (splits across Aave/Morpho/Spark)
-        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) =
-            yieldRouter.deposit(amount);
+        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) = yieldRouter.deposit(amount);
 
         // Track total routed
         totalRoutedPerPool[poolId] += amount;
 
-        emit YieldAutoRouted(
-            poolId,
-            marketId,
-            ybt,
-            amount,
-            aaveShares,
-            morphoShares,
-            sparkShares
-        );
+        emit YieldAutoRouted(poolId, marketId, ybt, amount, aaveShares, morphoShares, sparkShares);
     }
 
     /**
@@ -260,12 +236,7 @@ contract PublicGoodsYieldHook is BaseHook {
     function getPoolStats(PoolKey calldata key)
         external
         view
-        returns (
-            bytes32 marketId,
-            bool autoRoute,
-            uint256 totalRouted,
-            uint256 currentBalance
-        )
+        returns (bytes32 marketId, bool autoRoute, uint256 totalRouted, uint256 currentBalance)
     {
         PoolId poolId = key.toId();
         marketId = poolToMarketId[poolId];

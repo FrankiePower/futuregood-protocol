@@ -20,6 +20,6 @@ interface IStrategyInterface is IStrategy {
     // - withdraw(uint256, address, address) - Burn shares and withdraw assets
     // - balanceOf(address) - Get share balance
     // - etc. (Full ERC-4626 interface)
-
     // Future: Add FutureGood-specific strategy methods here
-}
+
+    }

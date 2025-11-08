@@ -2,7 +2,12 @@
 pragma solidity ^0.8.25;
 
 import "forge-std/console2.sol";
-import {SparkYieldDonatingSetup as Setup, ERC20, IStrategyInterface, ITokenizedStrategy} from "./SparkYieldDonatingSetup.sol";
+import {
+    SparkYieldDonatingSetup as Setup,
+    ERC20,
+    IStrategyInterface,
+    ITokenizedStrategy
+} from "./SparkYieldDonatingSetup.sol";
 
 contract SparkYieldDonatingOperationTest is Setup {
     function setUp() public virtual override {
@@ -71,31 +76,31 @@ contract SparkYieldDonatingOperationTest is Setup {
     function test_tendTrigger(uint256 _amount) public {
         vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
 
-        (bool trigger, ) = strategy.tendTrigger();
+        (bool trigger,) = strategy.tendTrigger();
         assertTrue(!trigger);
 
         // Deposit into strategy
         mintAndDepositIntoStrategy(strategy, user, _amount);
 
-        (trigger, ) = strategy.tendTrigger();
+        (trigger,) = strategy.tendTrigger();
         assertTrue(!trigger);
 
         // Skip some time
         skip(30 days);
 
-        (trigger, ) = strategy.tendTrigger();
+        (trigger,) = strategy.tendTrigger();
         assertTrue(!trigger);
 
         vm.prank(keeper);
         strategy.report();
 
-        (trigger, ) = strategy.tendTrigger();
+        (trigger,) = strategy.tendTrigger();
         assertTrue(!trigger);
 
         vm.prank(user);
         strategy.redeem(_amount, user, user);
 
-        (trigger, ) = strategy.tendTrigger();
+        (trigger,) = strategy.tendTrigger();
         assertTrue(!trigger);
     }
 }

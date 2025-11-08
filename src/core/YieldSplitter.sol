@@ -41,20 +41,16 @@ contract YieldSplitter {
     event MarketCreated(
         bytes32 indexed marketId, address indexed yieldBearingToken, address indexed assetToken, uint256 expiry
     );
-    
+
     /// @notice Emitted when user deposits YBT to mint PT/YT tokens
     event TokensDeposited(bytes32 indexed marketId, address indexed user, uint256 ybtAmount);
-    
+
     /// @notice Emitted when user redeems PT/YT tokens for YBT
     event TokensRedeemed(bytes32 indexed marketId, address indexed user, uint256 ybtAmount);
 
     /// @notice Emitted when user deposits in public goods mode
     event PublicGoodsDeposit(
-        bytes32 indexed marketId,
-        address indexed user,
-        uint256 ybtAmount,
-        uint256 ptToUser,
-        uint256 ytToPublicGoods
+        bytes32 indexed marketId, address indexed user, uint256 ybtAmount, uint256 ptToUser, uint256 ytToPublicGoods
     );
 
     /// @notice Address of the YT seller contract (receives YT in public goods mode)
@@ -96,11 +92,14 @@ contract YieldSplitter {
         string memory yieldTokenSymbol = IERC20Metadata(_yieldBearingToken).symbol();
 
         market.principalToken = address(
-            new PrincipalToken(string.concat("FutureGood Principal ", yieldTokenName), string.concat("FGP-", yieldTokenSymbol))
+            new PrincipalToken(
+                string.concat("FutureGood Principal ", yieldTokenName), string.concat("FGP-", yieldTokenSymbol)
+            )
         );
 
-        market.yieldToken =
-            address(new YieldToken(string.concat("FutureGood Yield ", yieldTokenName), string.concat("FGY-", yieldTokenSymbol)));
+        market.yieldToken = address(
+            new YieldToken(string.concat("FutureGood Yield ", yieldTokenName), string.concat("FGY-", yieldTokenSymbol))
+        );
 
         market.expiry = _expiry;
         market.initialApr = _initialApr;
@@ -255,7 +254,7 @@ contract YieldSplitter {
      * @param _yieldBearingAmount Amount of YBT to redeem
      */
     function redeemPtAndYt(bytes32 _marketId, uint256 _yieldBearingAmount) external {
-            YieldMarket memory market = yieldMarkets[_marketId];
+        YieldMarket memory market = yieldMarkets[_marketId];
         require(market.yieldBearingToken != address(0), "!exist");
 
         uint256 principalTokensNeeded = _yieldBearingAmount;

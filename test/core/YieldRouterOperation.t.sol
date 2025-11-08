@@ -177,8 +177,7 @@ contract YieldRouterOperationTest is Setup {
         uint256 _timeInDays = 30; // Fixed 30 days
 
         // Deposit through router
-        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) =
-            mintAndDepositIntoRouter(user, _amount);
+        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) = mintAndDepositIntoRouter(user, _amount);
 
         // Move forward in time to simulate yield accrual
         uint256 timeElapsed = _timeInDays * 1 days;
@@ -186,13 +185,13 @@ contract YieldRouterOperationTest is Setup {
 
         // Report profit on all strategies
         vm.prank(keeper);
-        (uint256 aaveProfit, ) = aaveStrategy.report();
+        (uint256 aaveProfit,) = aaveStrategy.report();
 
         vm.prank(keeper);
-        (uint256 morphoProfit, ) = morphoStrategy.report();
+        (uint256 morphoProfit,) = morphoStrategy.report();
 
         vm.prank(keeper);
-        (uint256 sparkProfit, ) = sparkStrategy.report();
+        (uint256 sparkProfit,) = sparkStrategy.report();
 
         console2.log("Aave profit:", aaveProfit);
         console2.log("Morpho profit:", morphoProfit);
@@ -235,8 +234,7 @@ contract YieldRouterOperationTest is Setup {
         vm.assume(_amount > minFuzzAmount && _amount < maxFuzzAmount);
 
         // Deposit through router
-        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) =
-            mintAndDepositIntoRouter(user, _amount);
+        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) = mintAndDepositIntoRouter(user, _amount);
 
         // Withdraw half from each strategy
         uint256 halfAave = aaveShares / 2;

@@ -81,11 +81,7 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
             500 // 5% APR
         );
 
-        marketId = keccak256(abi.encode(
-            address(yieldBearingToken),
-            address(underlyingAsset),
-            expiry
-        ));
+        marketId = keccak256(abi.encode(address(yieldBearingToken), address(underlyingAsset), expiry));
 
         YieldSplitter.YieldMarket memory market = yieldSplitter.getYieldMarket(marketId);
         console2.log("Market created with ID:", uint256(marketId));
@@ -96,9 +92,7 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         console2.log("\n=== PHASE 4: Deploy Hook ===");
 
         // Calculate hook address with correct permissions
-        uint160 flags = uint160(
-            Hooks.AFTER_INITIALIZE_FLAG | Hooks.AFTER_SWAP_FLAG
-        );
+        uint160 flags = uint160(Hooks.AFTER_INITIALIZE_FLAG | Hooks.AFTER_SWAP_FLAG);
 
         console2.log("Hook flags needed:", flags);
 
@@ -225,12 +219,7 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
 
         modifyLiquidityRouter.modifyLiquidity(
             poolKey,
-            ModifyLiquidityParams({
-                tickLower: tickLower,
-                tickUpper: tickUpper,
-                liquidityDelta: 1e18,
-                salt: bytes32(0)
-            }),
+            ModifyLiquidityParams({tickLower: tickLower, tickUpper: tickUpper, liquidityDelta: 1e18, salt: bytes32(0)}),
             ZERO_BYTES
         );
 
@@ -257,15 +246,8 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         // zeroForOne = false (going from currency1 to currency0)
         BalanceDelta delta = swapRouter.swap(
             poolKey,
-            SwapParams({
-                zeroForOne: false,
-                amountSpecified: -int256(swapAmount),
-                sqrtPriceLimitX96: MAX_PRICE_LIMIT
-            }),
-            PoolSwapTest.TestSettings({
-                takeClaims: false,
-                settleUsingBurn: false
-            }),
+            SwapParams({zeroForOne: false, amountSpecified: -int256(swapAmount), sqrtPriceLimitX96: MAX_PRICE_LIMIT}),
+            PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
             ZERO_BYTES
         );
         vm.stopPrank();
@@ -327,12 +309,8 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
     function test_E2E_GetPoolStats() public view {
         console2.log("\n=== TEST: Get Pool Stats ===");
 
-        (
-            bytes32 retrievedMarketId,
-            bool autoRoute,
-            uint256 totalRouted,
-            uint256 currentBalance
-        ) = hook.getPoolStats(poolKey);
+        (bytes32 retrievedMarketId, bool autoRoute, uint256 totalRouted, uint256 currentBalance) =
+            hook.getPoolStats(poolKey);
 
         assertEq(retrievedMarketId, marketId, "Market ID should match");
         assertTrue(autoRoute, "Auto-route should be enabled");
