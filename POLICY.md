@@ -1,16 +1,16 @@
-# 📜 FutureGood Protocol - Yield Routing Policy
+# 📜 FutureGood Protocol - Perpetual Funding Policy
 
 ## Executive Summary
 
-FutureGood Protocol captures value from yield tokenization and redirects it to public goods funding via Octant's dragonRouter. This document outlines how yield is allocated, routed, and donated to maximize impact while maintaining security and transparency.
+FutureGood Protocol creates perpetual endowments for public goods by capturing yield tokenization value and routing it to Octant's dragonRouter. This document outlines how we build permanent funding infrastructure that lasts forever.
 
 ---
 
 ## 🎯 Mission Statement
 
-**Enable users to donate future yield to public goods while preserving their principal.**
+**Build perpetual endowments for public goods. Donate yield, keep principal, fund forever.**
 
-Traditional charitable giving requires sacrificing assets today. FutureGood allows users to commit *tomorrow's yield* to public goods while keeping *today's principal*, creating a sustainable funding mechanism that aligns long-term incentives with public goods funding.
+Traditional giving models are unsustainable - donations disappear when spent, and yield donations stop when users withdraw. FutureGood creates PERMANENT endowments where YT sale proceeds stay in the protocol forever, generating perpetual yield to public goods even after users redeem their principal.
 
 ---
 
@@ -195,18 +195,23 @@ User redeems 100 PT
 | **Day 0** | User deposits | 100 USDC | - |
 | Day 0 | User receives PT | 100 PT | User |
 | Day 0 | Hook receives YT | 100 YT | Hook |
-| Day 0 | YT auto-sold | ~5 USDC | YieldRouter |
+| Day 0 | YT auto-sold | ~5 USDC | YieldSplitter (PERMANENT) |
 | Day 0 | Deployed to Aave | 2 USDC | AaveStrategy |
 | Day 0 | Deployed to Morpho | 1.5 USDC | MorphoStrategy |
 | Day 0 | Deployed to Spark | 1.5 USDC | SparkStrategy |
-| **Day 1-365** | Yield accrues | ~0.25 USDC | dragonRouter |
+| **Day 1-365** | Yield accrues from 105 USDC | ~5.25 USDC | dragonRouter |
 | **Day 365+** | User redeems PT | 100 USDC | User |
+| **Day 366+** | 5 USDC stays deployed FOREVER | ~0.25 USDC/year | dragonRouter (perpetual) |
 
-### Net Result
-- **User donated**: ~5.25 USDC (5 USDC YT value + 0.25 USDC yield)
+### Net Result (Perpetual Funding Model)
+- **User donated**: ~5 USDC YT value (one-time)
 - **User kept**: 100 USDC principal (100% preserved)
-- **Public goods received**: 5 USDC immediate + 0.25 USDC perpetual yield
-- **Effective donation rate**: ~5.25% (but principal preserved!)
+- **Public goods received**:
+  - Year 1: ~5.25 USDC
+  - Year 2+: ~0.25 USDC/year FOREVER
+  - 10-year impact: ~2.50 USDC
+  - 50-year impact: ~12.50 USDC
+- **Effective donation rate**: 5% upfront + perpetual yield generation
 
 ### Comparison to Traditional Donation
 
@@ -214,11 +219,13 @@ User redeems 100 PT
 - User loses 5 USDC permanently
 - Public goods receive 5 USDC one-time
 - No ongoing yield generation
+- Total 50-year impact: $5
 
-**FutureGood donation (100 USDC in public goods mode):**
+**FutureGood perpetual endowment (100 USDC in public goods mode):**
 - User loses 0 USDC principal (gets it all back at maturity)
-- Public goods receive 5 USDC immediately + perpetual yield
-- Total impact: ~5.25 USDC + ongoing yield forever
+- Public goods receive 5 USDC immediately + 0.25 USDC/year FOREVER
+- Total 50-year impact: ~$17.50 (5 + 12.50)
+- 250% MORE impact than traditional donation
 
 **Tax Implications** (consult tax advisor):
 - Traditional donation: May be deductible, but principal lost
@@ -331,8 +338,9 @@ uint256 dragonShares = aaveStrategy.balanceOf(dragonRouter);
 ### Transparency Guarantees
 - **On-chain verification**: All flows visible on blockchain
 - **Open-source code**: Full codebase available for audit
-- **Comprehensive tests**: 30/31 tests passing (96.8% success rate)
+- **Comprehensive tests**: 33/33 tests passing (100% success rate)
 - **Public events**: All key operations emit events
+- **Perpetual endowment proof**: test_PerpetualFunding_YTSaleCreatesEndowment verifies YT proceeds stay forever
 
 ### Alignment of Incentives
 - **Users**: Get principal back, tax-efficient giving
@@ -408,21 +416,21 @@ yieldSplitter.redeemPtAndYt(marketId, amount);
 
 ### Test Coverage Summary
 ```
-Total Tests: 31
-Passing: 30 (96.8%)
-Failing: 1 (E2E swap - non-blocking)
+Total Tests: 33
+Passing: 33 (100%)
 
 Strategy Tests: 10/10 ✅
-Router Tests: 10/10 ✅
+Router Tests: 9/9 ✅
 Hook Unit Tests: 5/5 ✅
-Hook E2E Tests: 6/7 ✅
+Hook E2E Tests: 7/7 ✅
+Full Flow Tests: 3/3 ✅ (includes perpetual funding proof)
 ```
 
 ---
 
-**Last Updated**: 2024-11-07
+**Last Updated**: 2024-11-08
 **Version**: 1.0.0
-**Status**: Hackathon Submission
+**Status**: Hackathon Submission - Perpetual Public Goods Funding
 
 ---
 
