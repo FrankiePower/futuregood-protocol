@@ -23,7 +23,19 @@ Traditional yield donation has a **capital efficiency problem**:
 
 ### How It Works
 
+flowchart TD
+    A[Alice deposits $100] --> B[Mint 100 PT → Alice]
+    A --> C[Mint 100 YT → Hook]
+    C --> D[YT listed on Uniswap V4]
+    E[Charlie buys YT for ~$5] --> D
+    D --> F[Hook receives $5]
+    F --> G[Hook auto-sends $5 → dragonRouter]
+    G --> H[Octant funds projects TODAY]
+    I[Over 1 year: $100 earns $5 yield] --> J[Yield → Charlie]
+    K[Year 1: Alice redeems PT] --> L[Gets $100 back]
+
 ```
+
 Step 1: TOKENIZATION
 ├─ Alice deposits 100 USDC
 ├─ Receives 100 PT (Principal Token - redeemable at maturity)
