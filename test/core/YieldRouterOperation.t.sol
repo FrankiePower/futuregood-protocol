@@ -9,7 +9,7 @@ contract YieldRouterOperationTest is Setup {
         super.setUp();
     }
 
-    function test_setupRouterOK() public {
+    function test_setupRouterOK() public view {
         console2.log("address of router", address(router));
         assertTrue(address(0) != address(router));
         assertEq(address(router.asset()), address(asset));
