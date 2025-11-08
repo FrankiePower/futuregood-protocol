@@ -1,7 +1,7 @@
 # 🌟 FutureGood Protocol
 ### Perpetual Public Goods Funding powered by Octant + Uniswap V4
 
-> **The first DeFi protocol that creates perpetual endowments for public goods** - users donate future yield while keeping their principal, building permanent funding infrastructure that lasts forever.
+**The first DeFi protocol that creates perpetual endowments for public goods** - users donate future yield while keeping their principal, building permanent funding infrastructure that lasts forever.
 
 ---
 
@@ -57,28 +57,13 @@ This creates a **self-sustaining treasury** for public goods that grows with eve
 
 ---
 
-## 🏆 Prize Categories - ACHIEVED
+## 📊 Architecture: PT-as-Collateral + Perpetual Endowments
 
-- ✅ **Aave ERC-4626 Integration** ($2,500) - Full AaveYieldDonatingStrategy with 3/3 tests passing
-- ✅ **Programmable Yield Allocation** ($2,000) - YieldRouter with 10/10 tests passing, perfect 40/30/30 split
-- ✅ **Morpho Vaults** ($1,500) - MorphoYieldDonatingStrategy with 3/3 tests passing
-- ✅ **Spark Integration** ($1,500) - SparkYieldDonatingStrategy with 3/3 tests passing
-- ✅ **Uniswap V4 Hook** ($1,500) - PublicGoodsYieldHook with 11/12 tests passing (6/7 E2E tests)
-- ✅ **Technical Excellence** ($1,500) - 30/31 tests passing (96.8%), comprehensive test coverage
-- ✅ **Creative UX/Mechanism** ($1,500) - First yield stripping for public goods
-
-**Total Target: $12,000** ✅
-
----
-
-## 📊 Architecture
-
+### Phase 1: User Deposit & Immediate Deployment
 ```
 ┌─────────────────────────────────────────────────────────────┐
-│                    USER DEPOSITS 100 USDC                   │
-│                   to YieldSplitter (Public Goods Mode)      │
+│         USER DEPOSITS 100 USDC (Public Goods Mode)          │
 └──────────────────────────┬──────────────────────────────────┘
-                           │
                            ▼
               ┌────────────────────────┐
               │   YieldSplitter.sol    │
@@ -91,34 +76,62 @@ This creates a **self-sustaining treasury** for public goods that grows with eve
    │ 100 PT  │                         │  100 YT  │
    │ → USER  │                         │ → HOOK   │
    └─────────┘                         └──────────┘
-   (Keep Principal)                          │
-                                             ▼
-                              ┌──────────────────────────┐
-                              │PublicGoodsYieldHook.sol  │
-                              │  Auto-triggers on swaps  │
-                              └──────────────────────────┘
-                                             │
-                                             ▼
-                                Sells YT for ~5 USDC on Uniswap V4
-                                             │
-                                             ▼
-                              ┌──────────────────────────┐
-                              │    YieldRouter.sol       │
-                              │   Splits 40/30/30        │
-                              └──────────────────────────┘
-                                             │
-                    ┌────────────────────────┼────────────────────┐
-                    ▼                        ▼                    ▼
-            ┌──────────────┐        ┌──────────────┐     ┌──────────────┐
-            │AaveStrategy  │        │MorphoStrategy│     │SparkStrategy │
-            │   (2 USDC)   │        │  (1.5 USDC)  │     │  (1.5 USDC)  │
-            └──────────────┘        └──────────────┘     └──────────────┘
-                    │                        │                    │
-                    └────────────────────────┼────────────────────┘
-                                             ▼
-                                All yield (5% APY) → dragonRouter
-                                   ~0.25 USDC/year to PUBLIC GOODS
+   (Redeemable)                    (Auto-sell on Uniswap V4)
+        │                                     │
+        │                                     ▼
+        │                      ┌──────────────────────────┐
+        │                      │PublicGoodsYieldHook.sol  │
+        │                      │  Sells YT for ~5 USDC    │
+        │                      └──────────────────────────┘
+        │                                     │
+        │                                     ▼
+        │                      YT proceeds → YieldSplitter
+        │                      (PERMANENT ENDOWMENT - stays forever)
+        │                                     │
+        │                                     ▼
+        │                      ┌──────────────────────────┐
+        │                      │    YieldRouter.sol       │
+        │                      │  Splits 40/30/30         │
+        │                      └──────────────────────────┘
+        │                                     │
+        │            ┌────────────────────────┼────────────────────┐
+        │            ▼                        ▼                    ▼
+        │    ┌──────────────┐        ┌──────────────┐     ┌──────────────┐
+        │    │AaveStrategy  │        │MorphoStrategy│     │SparkStrategy │
+        │    │  (40% YT $)  │        │  (30% YT $)  │     │  (30% YT $)  │
+        │    └──────────────┘        └──────────────┘     └──────────────┘
+        │            │                        │                    │
+        │            └────────────────────────┼────────────────────┘
+        │                                     ▼
+        │                        Yield from YT proceeds → dragonRouter
+        │                           ~0.25 USDC/year FOREVER
+        │
+        └──────────► MEANWHILE: User's 100 USDC ALSO deployed to strategies
+                     Generating ~5 USDC/year → dragonRouter (Year 1 only)
 ```
+
+### Phase 2: After User Redeems PT
+```
+User redeems 100 PT → Gets 100 USDC back
+        │
+        ▼
+YieldSplitter's 5 USDC endowment STAYS DEPLOYED
+        │
+        ▼
+Generates ~0.25 USDC/year → dragonRouter FOREVER
+```
+
+### The Breakthrough: Dual Yield Generation
+
+**Year 1** (while user holds PT):
+- User's 100 USDC in strategies → ~5 USDC yield → dragonRouter
+- YT proceeds (5 USDC) in strategies → ~0.25 USDC yield → dragonRouter
+- **Total: ~5.25 USDC to public goods**
+
+**Year 2+** (after user redeems):
+- User withdraws 100 USDC back
+- YT proceeds (5 USDC) stay in YieldSplitter
+- **Perpetual: ~0.25 USDC/year to public goods FOREVER**
 
 ---
 
@@ -463,27 +476,9 @@ This is how we build **permanent infrastructure for public goods funding**.
 
 ---
 
-## 🎥 Demo
-
-[Coming soon: 2-minute walkthrough video]
-
----
-
-## 🏆 Hackathon Submission
-
-**Octant DeFi Hackathon 2024**
-- Built in 10 hours sprint (continued from previous session)
-- 33/33 tests passing (100%) including perpetual funding proof
-- Targeting $12,000 in prizes across 7 categories
-- First-ever yield stripping protocol for public goods
-- First protocol to create perpetual endowments for public goods funding
-- Complete test coverage proving PT-as-collateral generates maximum yield
-
----
-
 ## 📄 License
 
-MIT License - see [LICENSE](LICENSE) for details
+MIT License
 
 ---
 
