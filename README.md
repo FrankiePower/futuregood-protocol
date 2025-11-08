@@ -303,7 +303,9 @@ function mintPtAndYtForPublicGoods(bytes32 _marketId, uint256 _amount) external 
     // Mint YT to hook (for public goods sale)
     YieldToken(market.yieldToken).mint(ytSeller, _amount);
 
-    // User's funds stay safe until user strategies implemented
+    // Deploy user's funds to YieldRouter → generates yield for YT holders
+    IERC20(market.yieldBearingToken).approve(address(yieldRouter), _amount);
+    yieldRouter.deposit(_amount);  // Splits 40% Aave, 30% Morpho, 30% Spark
 }
 ```
 
@@ -404,12 +406,16 @@ yieldSplitter.mintPtAndYt(marketId, amount);
 ⚠️ YieldRouter (allocation logic)
 
 ### Production TODOs
-🚧 **User Strategies**: Separate strategies where yield → YT holders
-🚧 **YT Yield Distribution**: Proportional distributor contract
+✅ **YieldRouter**: Deployed! User deposits split across Aave/Morpho/Spark (40/30/30)
+🚧 **YT Yield Distribution**: Need distributor contract to send strategy yields to YT holders
 🚧 **Security Audit**: Third-party audit before mainnet
-🚧 **dragonRouter Address**: Update with real Octant address
+🚧 **dragonRouter Address**: Update with real Octant address in deployment script
 
-See [FIXES_APPLIED.md](FIXES_APPLIED.md) for detailed implementation requirements.
+**Current Status:**
+- User deposits ARE deployed to strategies via YieldRouter ✅
+- Strategies generate yield (tested on mainnet fork) ✅
+- YT sale proceeds go directly to dragonRouter ✅
+- Missing: Mechanism to route strategy yields back to YT holders
 
 ---
 
