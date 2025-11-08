@@ -23,16 +23,7 @@ Traditional yield donation has a **capital efficiency problem**:
 
 ### How It Works
 
-flowchart TD
-    A[Alice deposits $100] --> B[Mint 100 PT → Alice]
-    A --> C[Mint 100 YT → Hook]
-    C --> D[YT listed on Uniswap V4]
-    E[Charlie buys YT for ~$5] --> D
-    D --> F[Hook receives $5]
-    F --> G[Hook auto-sends $5 → dragonRouter]
-    G --> H[Octant funds projects TODAY]
-    I[Over 1 year: $100 earns $5 yield] --> J[Yield → Charlie]
-    K[Year 1: Alice redeems PT] --> L[Gets $100 back]
+![FutureGood Protocol Flow](flowchart.svg)
 
 ```
 
@@ -119,6 +110,26 @@ Every $100 deposited unlocks ~$5 in **immediate capital** while preserving the f
 | $10,000,000 | $500,000 | Launch entire protocol |
 
 **The multiplier effect:** At scale, you're creating a **working capital pool** for public goods without anyone losing principal.
+
+---
+
+## 📊 Visual Diagrams
+
+### Protocol Architecture
+
+![Architecture](architecture.svg)
+
+### Token Lifecycle
+
+![Token Lifecycle](token-lifecycle.svg)
+
+### Capital Flow
+
+![Capital Flow](capital-flow.svg)
+
+### Impact Comparison: Traditional vs FutureGood
+
+![Comparison](comparison.svg)
 
 ---
 
