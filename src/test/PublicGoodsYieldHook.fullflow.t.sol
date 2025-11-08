@@ -17,7 +17,9 @@ import {MockERC20} from "./mocks/MockERC20.sol";
 import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC4626} from "@openzeppelin/contracts/interfaces/IERC4626.sol";
 import {IStrategyInterface} from "../interfaces/IStrategyInterface.sol";
-import {YieldDonatingTokenizedStrategy as YieldDonatingStrategy} from "@octant-core/strategies/yieldDonating/YieldDonatingTokenizedStrategy.sol";
+import {
+    YieldDonatingTokenizedStrategy as YieldDonatingStrategy
+} from "@octant-core/strategies/yieldDonating/YieldDonatingTokenizedStrategy.sol";
 
 /**
  * @title FullFlowTest
@@ -113,12 +115,8 @@ contract FullFlowTest is Test {
 
         // Deploy YieldRouter
         console2.log("\n=== Deploying YieldRouter ===");
-        yieldRouter = new YieldRouter(
-            address(asset),
-            address(aaveStrategy),
-            address(morphoStrategy),
-            address(sparkStrategy)
-        );
+        yieldRouter =
+            new YieldRouter(address(asset), address(aaveStrategy), address(morphoStrategy), address(sparkStrategy));
         console2.log("YieldRouter:", address(yieldRouter));
 
         // Wire YieldSplitter to YieldRouter
@@ -221,8 +219,7 @@ contract FullFlowTest is Test {
         console2.log("- Spark:", dragonSparkShares);
 
         assertTrue(
-            dragonAaveShares > 0 || dragonMorphoShares > 0 || dragonSparkShares > 0,
-            "DragonRouter should receive yield"
+            dragonAaveShares > 0 || dragonMorphoShares > 0 || dragonSparkShares > 0, "DragonRouter should receive yield"
         );
 
         console2.log("\n[SUCCESS] Yield stripping generates MAXIMUM yield!");
@@ -286,9 +283,9 @@ contract FullFlowTest is Test {
         skip(30 days);
 
         // Record dragonRouter shares before reports
-        uint256 dragonBefore = IERC4626(address(aaveStrategy)).balanceOf(dragonRouter) +
-                              IERC4626(address(morphoStrategy)).balanceOf(dragonRouter) +
-                              IERC4626(address(sparkStrategy)).balanceOf(dragonRouter);
+        uint256 dragonBefore = IERC4626(address(aaveStrategy)).balanceOf(dragonRouter)
+            + IERC4626(address(morphoStrategy)).balanceOf(dragonRouter)
+            + IERC4626(address(sparkStrategy)).balanceOf(dragonRouter);
 
         // Report all strategies
         vm.prank(keeper);
@@ -298,9 +295,9 @@ contract FullFlowTest is Test {
         vm.prank(keeper);
         IStrategyInterface(address(sparkStrategy)).report();
 
-        uint256 dragonAfter = IERC4626(address(aaveStrategy)).balanceOf(dragonRouter) +
-                             IERC4626(address(morphoStrategy)).balanceOf(dragonRouter) +
-                             IERC4626(address(sparkStrategy)).balanceOf(dragonRouter);
+        uint256 dragonAfter = IERC4626(address(aaveStrategy)).balanceOf(dragonRouter)
+            + IERC4626(address(morphoStrategy)).balanceOf(dragonRouter)
+            + IERC4626(address(sparkStrategy)).balanceOf(dragonRouter);
 
         uint256 totalYieldShares = dragonAfter - dragonBefore;
 
