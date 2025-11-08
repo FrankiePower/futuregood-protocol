@@ -139,7 +139,7 @@ Generates ~0.25 USDC/year → dragonRouter FOREVER
 
 ### ✅ **33/33 Tests Passing (100% Success Rate)**
 
-#### Strategy Tests (All Passing - 10/10)
+#### Strategy Tests (9/9 Passing)
 - **AaveYieldDonatingStrategy**: 3/3 ✅
   - test_setupStrategyOK (30,848 gas)
   - test_profitableReport (256 fuzzing runs, avg: 708,708 gas)
@@ -155,39 +155,38 @@ Generates ~0.25 USDC/year → dragonRouter FOREVER
   - test_profitableReport (256 fuzzing runs, avg: 542,794 gas)
   - test_tendTrigger (256 fuzzing runs, avg: 532,302 gas)
 
-- **YieldRouter**: 10/10 ✅
+- **YieldRouter**: 9/9 ✅
   - test_setupRouterOK (25,859 gas)
   - test_depositSplits40_30_30 (256 fuzzing runs) ← **Perfect 40/30/30 allocation verified**
-  - test_withdraw (256 fuzzing runs, avg: 1,729,734 gas)
-  - test_withdrawAll (256 fuzzing runs, avg: 1,840,938 gas)
-  - test_partialWithdrawal (256 fuzzing runs, avg: 1,661,686 gas)
-  - test_balances (256 fuzzing runs)
-  - test_assetBalances (256 fuzzing runs)
-  - test_totalBalance (256 fuzzing runs)
-  - test_yieldDonationStillWorksWithRouter (256 fuzzing runs) ← **Critical: Yield flows to dragonRouter**
-  - test_debugWithdraw (1,335,792 gas)
+  - test_withdraw (256 fuzzing runs, avg: 1,726,204 gas)
+  - test_withdrawAll (256 fuzzing runs, avg: 1,837,698 gas)
+  - test_partialWithdrawal (256 fuzzing runs, avg: 1,657,866 gas)
+  - test_balances (256 fuzzing runs, avg: 1,207,242 gas)
+  - test_assetBalances (256 fuzzing runs, avg: 1,243,666 gas)
+  - test_totalBalance (256 fuzzing runs, avg: 1,222,443 gas)
+  - test_yieldDonationStillWorksWithRouter (256 fuzzing runs, avg: 1,878,835 gas) ← **Critical: Yield flows to dragonRouter**
 
-#### Hook Tests (11/12 Passing)
+#### Hook Tests (12/12 Passing)
 - **PublicGoodsYieldHook Unit Tests**: 5/5 ✅
-  - test_YieldSplitterCreatesMarket (38,424 gas)
-  - test_PublicGoodsMintingWorks (238,238 gas) ← **PT/YT splitting works**
+  - test_YieldSplitterCreatesMarket (38,445 gas)
+  - test_PublicGoodsMintingWorks (240,428 gas) ← **PT/YT splitting works**
   - test_CannotSetYTSellerTwice (32,998 gas)
-  - test_MarketExpiry (31,440 gas)
+  - test_MarketExpiry (31,461 gas)
   - test_HookPermissions (6,162 gas)
 
-- **PublicGoodsYieldHook E2E Tests**: 6/7 ✅
-  - test_E2E_UserMintsPTYT (223,896 gas) ✅
+- **PublicGoodsYieldHook E2E Tests**: 7/7 ✅
+  - test_E2E_UserMintsPTYT (226,086 gas) ✅
   - test_E2E_PoolInitialization (32,437 gas) ✅
-  - test_E2E_AddLiquidityToPool (548,540 gas) ✅
+  - test_E2E_AddLiquidityToPool (548,517 gas) ✅
   - test_E2E_HookPermissions (19,135 gas) ✅
-  - test_E2E_ManualRoute (116,743 gas) ✅
-  - test_E2E_GetPoolStats (62,570 gas) ✅
-  - test_E2E_SwapInPool ⚠️ (complex approval issue, non-blocking)
+  - test_E2E_ManualRoute (116,764 gas) ✅
+  - test_E2E_GetPoolStats (62,591 gas) ✅
+  - test_E2E_SwapInPool (1,183,342 gas) ✅
 
 - **Full Flow Tests**: 3/3 ✅
-  - test_FullFlow_MaxYieldGeneration (1,622,051 gas) ✅
-  - test_Comparison_DirectVsYieldStripping (2,146,367 gas) ✅
-  - test_PerpetualFunding_YTSaleCreatesEndowment (2,136,318 gas) ✅ **← PROVES PERPETUAL FUNDING**
+  - test_FullFlow_MaxYieldGeneration (1,622,637 gas) ✅
+  - test_Comparison_DirectVsYieldStripping (2,146,953 gas) ✅
+  - test_PerpetualFunding_YTSaleCreatesEndowment (2,136,904 gas) ✅ **← PROVES PERPETUAL FUNDING**
 
 ### Key Achievements
 - ✅ All 3 strategies fully functional with extensive fuzzing (256 runs each)
