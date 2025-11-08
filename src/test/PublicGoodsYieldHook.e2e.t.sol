@@ -49,7 +49,8 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
 
     address public user1 = address(0x1);
     address public trader = address(0x2);
-    address public mockYieldRouter = address(0x999); // Mock for testing
+    address public mockYieldRouter = address(0x998); // Mock for testing
+    address public dragonRouter = address(0x999); // DragonRouter address (same as fullflow test)
 
     uint256 constant INITIAL_SUPPLY = 1000 ether;
 
@@ -97,7 +98,7 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         console2.log("Hook flags needed:", flags);
 
         // Deploy hook - use deployCodeTo to deploy with constructor args at specific address
-        bytes memory constructorArgs = abi.encode(manager, mockYieldRouter, address(yieldSplitter));
+        bytes memory constructorArgs = abi.encode(manager, mockYieldRouter, address(yieldSplitter), dragonRouter);
         address hookAddress = address(flags);
 
         deployCodeTo("PublicGoodsYieldHook.sol", constructorArgs, hookAddress);
@@ -304,17 +305,25 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         uint256 amount = 5 ether;
         yieldBearingToken.mint(address(hook), amount);
 
-        uint256 balanceBefore = yieldBearingToken.balanceOf(address(hook));
-        console2.log("Hook YBT before routing:", balanceBefore / 1e18);
+        uint256 hookBalanceBefore = yieldBearingToken.balanceOf(address(hook));
+        uint256 dragonBalanceBefore = yieldBearingToken.balanceOf(dragonRouter);
+        console2.log("Hook YBT before routing:", hookBalanceBefore / 1e18);
+        console2.log("DragonRouter YBT before:", dragonBalanceBefore / 1e18);
 
-        // Manual route (would normally call YieldRouter, but we have mock)
-        // This will revert because mockYieldRouter doesn't implement deposit()
-        // but it proves the routing logic is called
-
-        vm.expectRevert();
+        // UPDATED: After fixes, hook sends directly to dragonRouter (no revert)
         hook.manualRoute(poolKey);
 
-        console2.log("[OK] Manual route triggers (reverts on mock YieldRouter as expected)");
+        uint256 hookBalanceAfter = yieldBearingToken.balanceOf(address(hook));
+        uint256 dragonBalanceAfter = yieldBearingToken.balanceOf(dragonRouter);
+
+        console2.log("Hook YBT after routing:", hookBalanceAfter / 1e18);
+        console2.log("DragonRouter YBT after:", dragonBalanceAfter / 1e18);
+
+        // Verify YBT was transferred from hook to dragonRouter
+        assertEq(hookBalanceAfter, 0, "Hook should have sent all YBT");
+        assertEq(dragonBalanceAfter, amount, "DragonRouter should receive YBT");
+
+        console2.log("[OK] Manual route sends YBT directly to dragonRouter (FIXED!)");
     }
 
     function test_E2E_GetPoolStats() public view {

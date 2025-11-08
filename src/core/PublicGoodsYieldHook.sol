@@ -45,6 +45,10 @@ contract PublicGoodsYieldHook is BaseHook {
     /// @notice YieldSplitter for market info
     YieldSplitter public immutable yieldSplitter;
 
+    /// @notice dragonRouter - Octant's public goods distributor
+    /// @dev YT sale proceeds are sent directly here for immediate public goods funding
+    address public immutable dragonRouter;
+
     /// @notice Minimum amount to trigger auto-routing (gas optimization)
     uint256 public constant MIN_ROUTE_AMOUNT = 1e18; // 1 token
 
@@ -68,19 +72,27 @@ contract PublicGoodsYieldHook is BaseHook {
         uint256 morphoShares,
         uint256 sparkShares
     );
+    event YTProceededRouted(
+        PoolId indexed poolId, bytes32 indexed marketId, address indexed ybt, uint256 amount, address dragonRouter
+    );
 
     /**
      * @notice Initialize the hook
      * @param _poolManager Uniswap V4 PoolManager
      * @param _yieldRouter YieldRouter for routing proceeds
      * @param _yieldSplitter YieldSplitter for market data
+     * @param _dragonRouter Octant's dragonRouter address (receives YT sale proceeds)
      */
-    constructor(IPoolManager _poolManager, address _yieldRouter, address _yieldSplitter) BaseHook(_poolManager) {
+    constructor(IPoolManager _poolManager, address _yieldRouter, address _yieldSplitter, address _dragonRouter)
+        BaseHook(_poolManager)
+    {
         require(_yieldRouter != address(0), "zero router");
         require(_yieldSplitter != address(0), "zero splitter");
+        require(_dragonRouter != address(0), "zero dragonRouter");
 
         yieldRouter = YieldRouter(_yieldRouter);
         yieldSplitter = YieldSplitter(_yieldSplitter);
+        dragonRouter = _dragonRouter;
     }
 
     /**
@@ -184,23 +196,25 @@ contract PublicGoodsYieldHook is BaseHook {
     }
 
     /**
-     * @notice Internal function to route YBT to yield strategies
+     * @notice Internal function to route YBT proceeds from YT sales
+     * @dev CRITICAL FIX: YT sale proceeds go DIRECTLY to dragonRouter for immediate public goods funding
+     *      This is NOT re-invested - it goes straight to Octant for distribution
      * @param poolId Pool ID
      * @param marketId Market ID
      * @param ybt YBT token address
      * @param amount Amount to route
      */
     function _routeToYieldStrategies(PoolId poolId, bytes32 marketId, address ybt, uint256 amount) internal {
-        // Approve YieldRouter
-        IERC20(ybt).forceApprove(address(yieldRouter), amount);
-
-        // Deposit into YieldRouter (splits across Aave/Morpho/Spark)
-        (uint256 aaveShares, uint256 morphoShares, uint256 sparkShares) = yieldRouter.deposit(amount);
+        // FIXED: Send YT sale proceeds DIRECTLY to dragonRouter
+        // Previously: Deposited to strategies (wrong - that yield goes to dragonRouter, creating circular logic)
+        // Now: Direct transfer to dragonRouter for immediate public goods funding
+        IERC20(ybt).safeTransfer(dragonRouter, amount);
 
         // Track total routed
         totalRoutedPerPool[poolId] += amount;
 
-        emit YieldAutoRouted(poolId, marketId, ybt, amount, aaveShares, morphoShares, sparkShares);
+        // Emit event showing proceeds went to dragonRouter
+        emit YTProceededRouted(poolId, marketId, ybt, amount, dragonRouter);
     }
 
     /**

@@ -145,7 +145,9 @@ contract Deploy is Script {
         if (POOL_MANAGER != address(0)) {
             console2.log("\n5. Deploying PublicGoodsYieldHook...");
             console2.log("   NOTE: For production, deploy using CREATE2 with proper flags");
-            hook = new PublicGoodsYieldHook(IPoolManager(POOL_MANAGER), address(yieldRouter), address(yieldSplitter));
+            hook = new PublicGoodsYieldHook(
+                IPoolManager(POOL_MANAGER), address(yieldRouter), address(yieldSplitter), DRAGON_ROUTER
+            );
             console2.log("   PublicGoodsYieldHook:", address(hook));
 
             // Set hook as YT seller

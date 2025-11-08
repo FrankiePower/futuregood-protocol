@@ -150,8 +150,20 @@ contract YieldSplitter {
      * @param _marketId Market identifier
      * @param _amount Amount of YBT to deposit
      * @dev User receives PT (keeps principal), YT goes to ytSeller (donates yield)
-     *      IMPORTANT: User's principal is deployed to YieldRouter immediately to generate max yield
-     *      User can still redeem PT for full amount at maturity
+     *
+     *      CRITICAL FIX: User's funds are NOT auto-deployed to strategies here!
+     *
+     *      Why? The current YieldRouter strategies send ALL yield to dragonRouter.
+     *      But YT buyers need to receive the yield from user deposits!
+     *
+     *      The correct flow:
+     *      1. User deposits here (funds held in YieldSplitter)
+     *      2. YT sold to buyer (Charlie) who expects yield
+     *      3. User's funds should be deployed to SEPARATE strategies where yield → YT holders
+     *      4. YT sale proceeds (5 USDC) → dragonRouter immediately (done in Hook)
+     *
+     *      TODO: In production, implement separate user strategies or track user deposits
+     *      separately to ensure YT holders get the yield they paid for!
      */
     function mintPtAndYtForPublicGoods(bytes32 _marketId, uint256 _amount) external {
         YieldMarket memory market = yieldMarkets[_marketId];
@@ -168,13 +180,13 @@ contract YieldSplitter {
         // Mint YT to ytSeller (for auto-sale to public goods)
         YieldToken(market.yieldToken).mint(ytSeller, _amount);
 
-        // CRITICAL: Deploy user's principal to YieldRouter immediately
-        // This generates maximum yield while user still holds PT as receipt
-        // User can redeem PT for full amount at maturity
-        if (address(yieldRouter) != address(0)) {
-            IERC20(market.yieldBearingToken).forceApprove(address(yieldRouter), _amount);
-            yieldRouter.deposit(_amount);
-        }
+        // REMOVED: Auto-deployment to YieldRouter
+        // The current YieldRouter sends yield to dragonRouter, but YT buyers need that yield!
+        // For now, funds stay in YieldSplitter until proper user strategy routing is implemented
+        //
+        // FUTURE FIX: Deploy to separate user strategies where:
+        //   - User deposits (100 USDC) → userStrategies → yield goes to YT holders (Charlie)
+        //   - YT sale proceeds (5 USDC) → dragonRouter directly (already fixed in Hook!)
 
         emit PublicGoodsDeposit(_marketId, msg.sender, _amount, _amount, _amount);
     }
@@ -275,6 +287,10 @@ contract YieldSplitter {
      * @notice Redeems PT (and optionally YT) tokens for underlying YBT
      * @dev Before expiry: requires both PT and YT tokens (1:1:1 ratio)
      *      After expiry: requires only PT tokens (1:1 ratio)
+     *
+     *      IMPORTANT: In Public Goods Mode, user deposited funds are held in this contract
+     *      (not deployed to strategies) so redemption works from contract balance
+     *
      * @param _marketId Unique identifier for the yield market
      * @param _yieldBearingAmount Amount of YBT to redeem
      */
