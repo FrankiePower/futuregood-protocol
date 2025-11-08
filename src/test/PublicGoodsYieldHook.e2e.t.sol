@@ -72,7 +72,7 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         yieldSplitter = new YieldSplitter();
         console2.log("YieldSplitter:", address(yieldSplitter));
 
-        // 4. Create bond market
+        // 4. Create yield market
         expiry = block.timestamp + 365 days;
         yieldSplitter.createYieldMarket(
             address(yieldBearingToken),
