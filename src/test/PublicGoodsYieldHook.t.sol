@@ -135,7 +135,7 @@ contract PublicGoodsYieldHookTest is Test {
         yieldSplitter.setYTSeller(ytSeller2);
     }
 
-    function test_HookPermissions() public {
+    function test_HookPermissions() pure public {
         // Note: This test shows how hook would be configured
         // Full deployment requires hook address calculation and PoolManager setup
 

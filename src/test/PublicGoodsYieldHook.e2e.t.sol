@@ -244,8 +244,6 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         // First add liquidity
         test_E2E_AddLiquidityToPool();
 
-        YieldSplitter.YieldMarket memory market = yieldSplitter.getYieldMarket(marketId);
-
         // Trader has YBT, wants to buy YT
         uint256 swapAmount = 10 ether;
 
