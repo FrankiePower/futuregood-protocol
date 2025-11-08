@@ -8,6 +8,7 @@ import {IERC20} from "@openzeppelin/contracts/token/ERC20/IERC20.sol";
 import {IERC20Metadata} from "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol";
 import {PrincipalToken} from "./PrincipalToken.sol";
 import {YieldToken} from "./YieldToken.sol";
+import {YieldRouter} from "./YieldRouter.sol";
 
 /**
  * @title YieldSplitter
@@ -56,6 +57,9 @@ contract YieldSplitter {
     /// @notice Address of the YT seller contract (receives YT in public goods mode)
     address public ytSeller;
 
+    /// @notice Address of the YieldRouter for deploying principal funds
+    YieldRouter public yieldRouter;
+
     /// @notice Contract constructor - no initialization required
     constructor() {}
 
@@ -68,6 +72,17 @@ contract YieldSplitter {
         require(ytSeller == address(0), "already set");
         require(_ytSeller != address(0), "zero address");
         ytSeller = _ytSeller;
+    }
+
+    /**
+     * @notice Set the YieldRouter contract address
+     * @param _yieldRouter Address of YieldRouter for deploying funds
+     * @dev Only callable once during deployment
+     */
+    function setYieldRouter(address _yieldRouter) external {
+        require(address(yieldRouter) == address(0), "already set");
+        require(_yieldRouter != address(0), "zero address");
+        yieldRouter = YieldRouter(_yieldRouter);
     }
 
     /**
@@ -135,6 +150,8 @@ contract YieldSplitter {
      * @param _marketId Market identifier
      * @param _amount Amount of YBT to deposit
      * @dev User receives PT (keeps principal), YT goes to ytSeller (donates yield)
+     *      IMPORTANT: User's principal is deployed to YieldRouter immediately to generate max yield
+     *      User can still redeem PT for full amount at maturity
      */
     function mintPtAndYtForPublicGoods(bytes32 _marketId, uint256 _amount) external {
         YieldMarket memory market = yieldMarkets[_marketId];
@@ -145,11 +162,19 @@ contract YieldSplitter {
         // Transfer YBT from user
         IERC20(market.yieldBearingToken).safeTransferFrom(msg.sender, address(this), _amount);
 
-        // Mint PT to user (they keep principal)
+        // Mint PT to user (they keep principal, redeemable at maturity)
         PrincipalToken(market.principalToken).mint(msg.sender, _amount);
 
         // Mint YT to ytSeller (for auto-sale to public goods)
         YieldToken(market.yieldToken).mint(ytSeller, _amount);
+
+        // CRITICAL: Deploy user's principal to YieldRouter immediately
+        // This generates maximum yield while user still holds PT as receipt
+        // User can redeem PT for full amount at maturity
+        if (address(yieldRouter) != address(0)) {
+            IERC20(market.yieldBearingToken).forceApprove(address(yieldRouter), _amount);
+            yieldRouter.deposit(_amount);
+        }
 
         emit PublicGoodsDeposit(_marketId, msg.sender, _amount, _amount, _amount);
     }

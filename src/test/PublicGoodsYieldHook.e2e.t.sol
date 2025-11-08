@@ -239,14 +239,25 @@ contract PublicGoodsYieldHookE2ETest is Test, Deployers {
         // Mint YBT to trader
         yieldBearingToken.mint(trader, swapAmount * 2);
 
-        vm.startPrank(trader);
-        yieldBearingToken.approve(address(swapRouter), swapAmount * 2);
+        YieldSplitter.YieldMarket memory market = yieldSplitter.getYieldMarket(marketId);
 
-        // Swap YBT (currency1) for YT (currency0)
-        // zeroForOne = false (going from currency1 to currency0)
+        vm.startPrank(trader);
+        // IMPORTANT: Approve swapRouter for both tokens (Uniswap V4 may need both for settlement)
+        yieldBearingToken.approve(address(swapRouter), type(uint256).max);
+        YieldToken(market.yieldToken).approve(address(swapRouter), type(uint256).max);
+
+        // Determine swap direction based on actual pool currency order
+        // The pool currencies are sorted (currency0 < currency1), so we need to check which is YBT
+        bool ybtIsCurrency0 = Currency.unwrap(poolKey.currency0) == address(yieldBearingToken);
+        bool zeroForOne = ybtIsCurrency0; // If YBT is currency0, swap it for currency1 (YT)
+
         BalanceDelta delta = swapRouter.swap(
             poolKey,
-            SwapParams({zeroForOne: false, amountSpecified: -int256(swapAmount), sqrtPriceLimitX96: MAX_PRICE_LIMIT}),
+            SwapParams({
+                zeroForOne: zeroForOne,
+                amountSpecified: -int256(swapAmount),
+                sqrtPriceLimitX96: zeroForOne ? MIN_PRICE_LIMIT : MAX_PRICE_LIMIT
+            }),
             PoolSwapTest.TestSettings({takeClaims: false, settleUsingBurn: false}),
             ZERO_BYTES
         );
