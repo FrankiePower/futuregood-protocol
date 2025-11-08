@@ -12,3 +12,14 @@ docs/
 
 # Dotenv file
 .env
+
+# Dependencies
+dependencies/
+node_modules/
+
+# Coverage
+coverage/
+lcov.info
+
+# Foundry
+*.sol.template.json
